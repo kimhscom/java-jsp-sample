@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="happy.answerboard">
+ 
+ 	<!-- 전체조회 -->
+ 	<select id="selectAllBoard" resultType="Adto">
+		SELECT SEQ, ID, TITLE, REFER, STEP, DEPTH,
+		READCOUNT, DELFLAG, REGDATE
+  		FROM ANSWERBOARD
+ 		ORDER BY REFER DESC, STEP ASC
+	</select>
+	
+	<!-- 상세조회 -->
+	<select id="selectDetailBoard" parameterType="java.lang.String" resultType="Adto">
+		SELECT SEQ, ID, TITLE, CONTENT, REGDATE
+		FROM ANSWERBOARD
+		WHERE SEQ = #{seq}
+	</select>
+	
+	<!-- 답글 -->
+	<update id="replyUpdate" parameterType="Adto">
+		UPDATE ANSWERBOARD SET 
+			STEP = STEP+1 
+			WHERE REFER = (SELECT REFER FROM ANSWERBOARD WHERE SEQ = #{seq}) 
+			AND STEP > (SELECT STEP FROM ANSWERBOARD WHERE SEQ = #{seq})
+	</update>
+	
+	<insert id="replyInsert" parameterType="Adto">
+		 INSERT INTO ANSWERBOARD(SEQ, ID, TITLE,  
+				         CONTENT,  
+				         REFER,  
+				         STEP,  
+				         DEPTH,  
+				         READCOUNT, DELFLAG, REGDATE)  
+				        VALUES(ANSWERBOARD_SEQ.NEXTVAL, #{id}, #{title}, #{content}, 
+				              (SELECT REFER FROM ANSWERBOARD WHERE SEQ=#{seq}),  
+				               (SELECT STEP FROM ANSWERBOARD WHERE SEQ=#{seq})+1, 
+				               (SELECT DEPTH FROM ANSWERBOARD WHERE SEQ=#{seq})+1,  
+				               0, 'N',SYSDATE) 
+	</insert>
+	
+	<!-- 글수정 -->
+	<update id="modifyBoard" parameterType="Adto">
+		UPDATE ANSWERBOARD SET TITLE= #{title}, 
+				CONTENT = #{content} 
+				WHERE SEQ = #{seq} 
+	</update>
+	
+	<!-- 글삭제 변경 -->
+	<update id="deleteBoard" parameterType="java.lang.String">
+		UPDATE ANSWERBOARD SET DELFLAG = 'Y' 
+				WHERE SEQ= #{seq}		
+	</update>
+	
+	<!-- 새글입력 -->
+	<insert id="insertBoard" parameterType="Adto">
+	INSERT INTO ANSWERBOARD(SEQ, ID, TITLE,
+	CONTENT,
+	REFER, STEP,
+	DEPTH, READCOUNT, DELFLAG,
+	REGDATE)
+	VALUES(ANSWERBOARD_SEQ.NEXTVAL, #{id}, #{title},
+	#{content},
+	(SELECT NVL(MAX(REFER),0)+1 FROM ANSWERBOARD),0,
+	0, 0, 'N',
+	SYSDATE) 
+	</insert>
+	
+	<!-- 조회수 증가 -->
+	<update id="readCount" parameterType="java.lang.String">
+	UPDATE ANSWERBOARD SET READCOUNT = READCOUNT+1
+	WHERE SEQ = #{seq} 
+	</update>
+	
+	<!-- 완전삭제 -->
+	<delete id="deleteBoardReal" parameterType="java.lang.String">
+		DELETE FROM ANSWERBOARD WHERE SEQ = #{seq}
+	</delete>
+	
+	<!-- 다중삭제 -->
+	<update id="multiDelete" parameterType="java.lang.String">
+	UPDATE ANSWERBOARD SET DELFLAG = 'Y'
+	WHERE SEQ= #{seq} 
+	</update>
+ 
+</mapper>

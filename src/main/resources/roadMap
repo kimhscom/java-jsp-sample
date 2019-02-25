@@ -1,0 +1,29 @@
+컨트롤러
+boardController.jsp
+요청key이름
+command
+
+요청key값 오류 상황
+error.jsp(url, message)
+
+첫페이지(boardList)(./boardList.jsp),
+lists
+
+다중삭제
+(command=multidel
+ch=sep)
+
+새글작성-미
+(command=writeForm)
+
+상세보기
+command=detailBoard
+
+완전삭제 del
+
+글수정 modify()
+command=modifyForm
+seq
+폼화면modifyForm.jsp
+
+답글작성 reply
